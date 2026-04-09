@@ -1,15 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "Chess Analyzer PRO",
-  "version": "2.0",
-  "description": "Multi-arrow chess analyzer",
+  "name": "Lichess Auto Stockfish Arrow",
+  "version": "1.0",
+  "description": "Auto analysis + arrow real-time di Lichess",
   "permissions": ["scripting", "activeTab"],
-  "host_permissions": ["https://www.chess.com/*"],
+  "host_permissions": ["https://lichess.org/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
   "content_scripts": [
     {
-      "matches": ["https://www.chess.com/*"],
+      "matches": ["https://lichess.org/*"],
       "js": ["content.js"],
-      "css": ["overlay.css"]
+      "css": ["style.css"]
     }
   ],
   "web_accessible_resources": [
