@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Lichess Auto Stockfish Arrow",
-  "version": "1.0",
-  "description": "Auto analysis + arrow real-time di Lichess",
+  "name": "Lichess Auto Stockfish Arrow (FIXED)",
+  "version": "2.0",
+  "description": "Auto analysis real-time tanpa CSP issue",
   "permissions": ["scripting", "activeTab"],
   "host_permissions": ["https://lichess.org/*"],
   "background": {
