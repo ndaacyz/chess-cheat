@@ -1,0 +1,12 @@
+#chess-ai-box {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  background: black;
+  color: lime;
+  padding: 10px;
+  font-size: 12px;
+  z-index: 9999;
+  border-radius: 8px;
+  font-family: monospace;
+}
