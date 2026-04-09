@@ -1,61 +1,33 @@
-let engine = null;
 let currentFen = null;
 
 // ======================
-// INIT STOCKFISH
-// ======================
-async function initEngine() {
-  const stockfishUrl = chrome.runtime.getURL("stockfish.js");
-
-  // fetch script sebagai text
-  const response = await fetch(stockfishUrl);
-  const blob = await response.blob();
-
-  // buat blob URL
-  const blobUrl = URL.createObjectURL(blob);
-
-  // jalankan worker dari blob
-  engine = new Worker(blobUrl);
-
-  engine.onmessage = function (event) {
-    const line = event.data;
-
-    if (typeof line !== "string") return;
-
-    if (line.startsWith("bestmove")) {
-      const move = line.split(" ")[1];
-      handleBestMove(move);
-    }
-  };
-
-  engine.postMessage("uci");
-}
-
-// ======================
-// ANALYZE POSITION
+// KIRIM FEN KE BACKGROUND
 // ======================
 function analyzePosition(fen) {
-  if (!engine) return;
-
-  engine.postMessage("stop");
-  engine.postMessage("position fen " + fen);
-  engine.postMessage("go depth 12");
+  chrome.runtime.sendMessage({
+    type: "analyze",
+    fen: fen
+  });
 }
 
 // ======================
-// HANDLE BEST MOVE
+// TERIMA BEST MOVE
 // ======================
-function handleBestMove(move) {
-  if (!move || move.length < 4) return;
+chrome.runtime.onMessage.addListener((msg) => {
+  if (msg.type === "bestmove") {
+    const move = msg.move;
 
-  const from = move.substring(0, 2);
-  const to = move.substring(2, 4);
+    if (!move || move.length < 4) return;
 
-  drawArrow(from, to);
-}
+    const from = move.substring(0, 2);
+    const to = move.substring(2, 4);
+
+    drawArrow(from, to);
+  }
+});
 
 // ======================
-// WATCH BOARD (AUTO)
+// WATCH BOARD
 // ======================
 function watchBoard() {
   const board = document.querySelector("cg-board");
@@ -77,7 +49,22 @@ function watchBoard() {
 }
 
 // ======================
-// DRAW ARROW
+// WAIT BOARD
+// ======================
+function waitBoard() {
+  const interval = setInterval(() => {
+    const board = document.querySelector("cg-board");
+
+    if (board) {
+      clearInterval(interval);
+      console.log("Board ready ✅");
+      watchBoard();
+    }
+  }, 1000);
+}
+
+// ======================
+// DRAW ARROW (FIXED)
 // ======================
 function drawArrow(from, to) {
   const board = document.querySelector("cg-board");
@@ -114,13 +101,13 @@ function drawArrow(from, to) {
   svg.id = "sf-arrow";
 
   Object.assign(svg.style, {
-    position: "fixed",
-    top: rect.top + "px",
-    left: rect.left + "px",
-    width: rect.width + "px",
-    height: rect.height + "px",
+    position: "absolute",
+    top: board.offsetTop + "px",
+    left: board.offsetLeft + "px",
+    width: board.offsetWidth + "px",
+    height: board.offsetHeight + "px",
     pointerEvents: "none",
-    zIndex: 9999
+    zIndex: 99999
   });
 
   const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
@@ -146,13 +133,13 @@ function drawArrow(from, to) {
   line.setAttribute("x2", b.x);
   line.setAttribute("y2", b.y);
   line.setAttribute("stroke", "lime");
-  line.setAttribute("stroke-width", "6");
+  line.setAttribute("stroke-width", "8");
   line.setAttribute("marker-end", "url(#arrowhead)");
 
   svg.appendChild(defs);
   svg.appendChild(line);
 
-  document.body.appendChild(svg);
+  board.parentElement.appendChild(svg);
 }
 
 // ======================
@@ -160,7 +147,6 @@ function drawArrow(from, to) {
 // ======================
 window.addEventListener("load", () => {
   setTimeout(() => {
-    initEngine();
-    watchBoard();
+    waitBoard();
   }, 2000);
 });
