@@ -4,8 +4,18 @@ let currentFen = null;
 // ======================
 // INIT STOCKFISH
 // ======================
-function initEngine() {
-  engine = new Worker(chrome.runtime.getURL("stockfish.js"));
+async function initEngine() {
+  const stockfishUrl = chrome.runtime.getURL("stockfish.js");
+
+  // fetch script sebagai text
+  const response = await fetch(stockfishUrl);
+  const blob = await response.blob();
+
+  // buat blob URL
+  const blobUrl = URL.createObjectURL(blob);
+
+  // jalankan worker dari blob
+  engine = new Worker(blobUrl);
 
   engine.onmessage = function (event) {
     const line = event.data;
