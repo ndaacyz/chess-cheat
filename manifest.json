@@ -1,24 +1,39 @@
 {
   "manifest_version": 3,
-  "name": "Lichess Auto Stockfish Arrow (FIXED)",
-  "version": "2.0",
-  "description": "Auto analysis real-time tanpa CSP issue",
-  "permissions": ["scripting", "activeTab"],
-  "host_permissions": ["https://lichess.org/*"],
+  "name": "Chess.com Analysis Assistant",
+  "version": "1.0",
+  "description": "Analisis posisi catur dengan panah petunjuk langsung di board.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.chess.com/*"
+  ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["https://lichess.org/*"],
-      "js": ["content.js"],
-      "css": ["style.css"]
+      "matches": ["*://*.chess.com/*"],
+      "js": ["src/content.js"],
+      "css": ["src/overlay.css"],
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["stockfish.js", "stockfish.wasm"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "src/stockfish/stockfish.js",
+        "src/stockfish/stockfish.wasm",
+        "src/stockfish/stockfish.worker.js"
+      ],
+      "matches": ["*://*.chess.com/*"]
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup/popup.html"
+  }
 }
